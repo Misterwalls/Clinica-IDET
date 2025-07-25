@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analíticas en Tiempo Real | Clínica Médica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --neon-blue: #00a8ff;
+            --neon-pink: #f700ff;
+            --accent-blue: #0077b6;
+            --light-gray: #94a3b8;
+            --white: #f1f5f9;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --success-green: #00ff88;
+            --danger-red: #ff3a5e;
+            --led-glow: 0 0 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(247, 0, 255, 0.15) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .logo {
+            height: 50px;
+            filter: drop-shadow(var(--led-glow) var(--neon-blue));
+        }
+
+        .header-title h1 {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-title p {
+            color: var(--light-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Botón de Volver Moderno */
+        .back-btn {
+            background: rgba(0, 168, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            border-radius: 30px;
+            color: var(--neon-blue);
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 168, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 168, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .back-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover i {
+            transform: translateX(-3px);
+        }
+
+        .real-time-badge {
+            background: rgba(0, 168, 255, 0.2);
+            border: 1px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 168, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 168, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 168, 255, 0); }
+        }
+
+        /* Main Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        /* Cards */
+        .analytics-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--neon-blue);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Card Sizes */
+        .card-summary {
+            grid-column: span 3;
+        }
+
+        .card-main-chart {
+            grid-column: span 6;
+        }
+
+        .card-side-chart {
+            grid-column: span 3;
+        }
+
+        /* KPI Cards */
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            background: linear-gradient(90deg, var(--neon-blue), var(--success-green));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Time Filters */
+        .time-filters {
+            display: flex;
+            gap: 1rem;
+            margin: 0 2rem 1.5rem;
+        }
+
+        .time-filter {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            border-radius: 20px;
+            color: var(--neon-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-filter.active {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+        }
+
+        .time-filter:hover {
+            background: rgba(0, 245, 255, 0.1);
+        }
+
+        /* Footer Credits */
+        .credits {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .credit-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .credit-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .credit-card:hover {
+            border-color: var(--neon-blue);
+            transform: translateY(-5px);
+        }
+
+        .credit-card h3 {
+            color: var(--neon-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .credit-card p {
+            color: var(--light-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analytics-card {
+                grid-column: span 1 !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .credit-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .back-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div>
+            <button class="back-btn" onclick="window.location.href='EditorHome.html'">
+                <i class="fas fa-arrow-left"></i> Volver al Editor
+            </button>
+        </div>
+
+        <div class="header-title">
+            <h1>Dashboard de Analíticas</h1>
+            <p>Monitoreo en tiempo real de la clínica</p>
+        </div>
+
+        <div class="real-time-badge">
+            <i class="fas fa-circle" style="color: var(--success-green);"></i>
+            <span>TIEMPO REAL</span>
+        </div>
+    </header>
+
+    <!-- Time Filters -->
+    <div class="time-filters">
+        <button class="time-filter active" data-range="7">HOY</button>
+        <button class="time-filter" data-range="30">7 DÍAS</button>
+        <button class="time-filter" data-range="90">30 DÍAS</button>
+        <button class="time-filter" data-range="365">PERSONALIZADO</button>
+    </div>
+
+    <!-- Main Grid -->
+    <main class="analytics-grid">
+        <!-- Resumen KPIs -->
+        <div class="analytics-card card-summary">
+            <div class="card-header">
+                <h3 class="card-title">Usuarios Nuevos</h3>
+                <i class="fas fa-user-plus" style="color: var(--neon-blue);"></i>
+            </div>
+            <div class="kpi-value" id="new-users">142</div>
+            <div class="kpi-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                <span>12.5% vs ayer</span>
+            </div>
+        </div>
+
+        <div class="analytics-card card-summary">
+            <div class="card-header">
+                <h3 class="card-title">Usuarios Recurrentes</h3>
+                <i class="fas fa-user-clock" style="color: var(--neon-pink);"></i>
+            </div>
+            <div class="kpi-value" id="returning-users">78</div>
+            <div class="kpi-trend trend-down">
+                <i class="fas fa-arrow-down"></i>
+                <span>2.1% vs ayer</span>
+            </div>
+        </div>
+
+        <div class="analytics-card card-summary">
+            <div class="card-header">
+                <h3 class="card-title">Horas Pico</h3>
+                <i class="fas fa-chart-line" style="color: var(--success-green);"></i>
+            </div>
+            <div class="kpi-value" id="peak-hours">10:00 - 12:00</div>
+            <div class="kpi-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                <span>15% más tráfico</span>
+            </div>
+        </div>
+
+        <!-- Gráfico Principal -->
+        <div class="analytics-card card-main-chart">
+            <div class="card-header">
+                <h3 class="card-title">Usuarios Nuevos vs Recurrentes</h3>
+                <div class="chart-legend">
+                    <span style="color: var(--neon-blue);"><i class="fas fa-circle"></i> Nuevos</span>
+                    <span style="color: var(--neon-pink); margin-left: 1rem;"><i class="fas fa-circle"></i> Recurrentes</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="users-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico de Horas -->
+        <div class="analytics-card card-side-chart">
+            <div class="card-header">
+                <h3 class="card-title">Horas de Tráfico</h3>
+                <i class="fas fa-clock" style="color: var(--neon-blue);"></i>
+            </div>
+            <div class="chart-container" id="hours-chart"></div>
+        </div>
+
+        <!-- Gráfico de Servicios -->
+        <div class="analytics-card">
+            <div class="card-header">
+                <h3 class="card-title">Servicios Más Solicitados</h3>
+                <i class="fas fa-procedures" style="color: var(--neon-pink);"></i>
+            </div>
+            <div class="chart-container" id="services-chart"></div>
+        </div>
+    </main>
+
+    <!-- Footer Credits -->
+    <footer class="credits">
+        <h3>Equipo Directivo</h3>
+        <div class="credit-cards">
+            <div class="credit-card">
+                <h3><i class="fas fa-code"></i> Desarrollo</h3>
+                <p>Sistema creado por Jose Paredes</p>
+                <p>Analíticas en tiempo real</p>
+            </div>
+            <div class="credit-card">
+                <h3><i class="fas fa-user-md"></i> Directora ejecutiva</h3>
+                <p>Lic. Lilian Perez</p>
+            </div>
+            <div class="credit-card">
+                <h3><i class="fas fa-hospital"></i> Clínica</h3>
+                <p>Clinica IDET Barquisimeto</p>
+                <p>Excelencia en cuidado médico</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Datos simulados en tiempo real
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Actualizar datos en tiempo real
+        function updateRealTimeData() {
+            // Actualizar KPIs
+            document.getElementById('new-users').textContent = getRandomInt(100, 200);
+            document.getElementById('returning-users').textContent = getRandomInt(50, 100);
+
+            // Actualizar horas pico
+            const peakTimes = ['8:00 - 10:00', '10:00 - 12:00', '14:00 - 16:00', '16:00 - 18:00'];
+            document.getElementById('peak-hours').textContent = peakTimes[Math.floor(Math.random() * peakTimes.length)];
+
+            // Actualizar gráficos
+            updateCharts();
+        }
+
+        // Inicializar gráficos
+        let usersChart, hoursChart, servicesChart;
+
+        function initCharts() {
+            // Gráfico de usuarios (Chart.js)
+            const usersCtx = document.getElementById('users-chart').getContext('2d');
+            usersChart = new Chart(usersCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                    datasets: [
+                        {
+                            label: 'Nuevos usuarios',
+                            data: Array.from({length: 24}, () => getRandomInt(0, 20)),
+                            borderColor: '#00a8ff',
+                            backgroundColor: 'rgba(0, 168, 255, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Usuarios recurrentes',
+                            data: Array.from({length: 24}, () => getRandomInt(0, 15)),
+                            borderColor: '#f700ff',
+                            backgroundColor: 'rgba(247, 0, 255, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { grid: { display: false } }
+                    },
+                    animation: {
+                        duration: 1000
+                    }
+                }
+            });
+
+            // Gráfico de horas (ECharts)
+            hoursChart = echarts.init(document.getElementById('hours-chart'));
+
+            // Gráfico de servicios (ECharts)
+            servicesChart = echarts.init(document.getElementById('services-chart'));
+
+            updateCharts();
+        }
+
+        function updateCharts() {
+            // Actualizar gráfico de horas
+            hoursChart.setOption({
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: ['8-10', '10-12', '12-14', '14-16', '16-18', '18-20']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: Array.from({length: 6}, () => getRandomInt(20, 100)),
+                    type: 'bar',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#00a8ff' },
+                            { offset: 1, color: '#f700ff' }
+                        ])
+                    }
+                }]
+            });
+
+            // Actualizar gráfico de servicios
+            servicesChart.setOption({
+                tooltip: { trigger: 'item' },
+                series: [{
+                    name: 'Servicios',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: [
+                        { value: getRandomInt(50, 150), name: 'Consulta General' },
+                        { value: getRandomInt(30, 100), name: 'Urgencias' },
+                        { value: getRandomInt(20, 80), name: 'Exámenes' },
+                        { value: getRandomInt(10, 50), name: 'Terapias' },
+                        { value: getRandomInt(5, 30), name: 'Cirugías' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#0f172a',
+                        borderWidth: 2
+                    }
+                }]
+            });
+        }
+
+        // Filtros de tiempo
+        document.querySelectorAll('.time-filter').forEach(filter => {
+            filter.addEventListener('click', function() {
+                document.querySelector('.time-filter.active').classList.remove('active');
+                this.classList.add('active');
+
+                // Simular cambio de rango de tiempo
+                updateRealTimeData();
+            });
+        });
+
+        // Iniciar todo
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            updateRealTimeData();
+
+            // Actualizar datos cada 5 segundos
+            setInterval(updateRealTimeData, 5000);
+        });
+    </script>
+</body>
+</html>

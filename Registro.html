@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Clínica IDET</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeOut 1s ease-out forwards;
+            animation-delay: 3s;
+        }
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        .logo-loading {
+            height: 100px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .register-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
+            animation-delay: 3.5s;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        .register-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .register-form input[type="text"],
+        .register-form input[type="password"],
+        .register-form input[type="email"],
+        .register-form input[type="tel"] {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .register-form input[type="text"]:focus,
+        .register-form input[type="password"]:focus,
+        .register-form input[type="email"]:focus,
+        .register-form input[type="tel"]:focus {
+            border-color: #007BFF;
+        }
+        .register-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .register-form button:hover {
+            background-color: #0056b3;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            height: 80px;
+        }
+        .back-button {
+            display: block;
+            margin-top: 15px;
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #bbb;
+        }
+        .surprise {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #007BFF;
+            display: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <img src="img/logo-idet-400.png" alt="Logo IDET" class="logo-loading">
+    </div>
+    <div class="register-container">
+        <div class="logo">
+            <img src="img/logo-idet-400.png" alt="Logo IDET">
+        </div>
+        <h2>Registro de Usuario</h2>
+        <form class="register-form" id="registerForm">
+            <input type="text" name="name" placeholder="Nombre y Apellido" required>
+            <input type="text" name="age" placeholder="Edad" required>
+            <input type="tel" name="phone" placeholder="Número de Teléfono" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Registrarse</button>
+        </form>
+        <div class="surprise" id="surprise">
+            ¡Gracias por registrarte! Aquí tienes un cupón de descuento: <strong>IDET10</strong> para tu próxima consulta.
+        </div>
+        <a href="index.html" class="back-button">Atrás</a>
+    </div>
+    <script>
+        setTimeout(function() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }, 3000);
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('surprise').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - IDET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --neon-blue: #00a8ff;
+            --neon-pink: #f700ff;
+            --accent-blue: #0077b6;
+            --light-gray: #94a3b8;
+            --white: #f1f5f9;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --led-glow: 0 0 15px;
+            --danger-red: #ff3a5e;
+            --warning-yellow: #ffcc00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(247, 0, 255, 0.15) 0%, transparent 50%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Estilo Consistente */
+        .admin-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        /* Título con efecto neon */
+        .welcome-message {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .welcome-text {
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
+            animation: textGlow 2s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 5px var(--neon-blue); }
+            to { text-shadow: 0 0 15px var(--neon-pink); }
+        }
+
+        .admin-role {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+
+        /* Contenedor Principal */
+        .user-management {
+            display: flex;
+            padding: 2rem 3rem;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        /* Columnas */
+        .users-column {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            margin-bottom: 70px; /* Espacio para el botón salir */
+        }
+
+        .admin-column {
+            border-color: var(--neon-blue);
+        }
+
+        .client-column {
+            border-color: var(--neon-pink);
+        }
+
+        .column-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .admin-column .column-title {
+            color: var(--neon-blue);
+            border-bottom-color: var(--neon-blue);
+        }
+
+        .client-column .column-title {
+            color: var(--neon-pink);
+            border-bottom-color: var(--neon-pink);
+        }
+
+        /* Fichas de Usuario SIN AVATAR */
+        .user-card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card {
+            border-left-color: var(--neon-blue);
+        }
+
+        .client-card {
+            border-left-color: var(--neon-pink);
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .user-header {
+            margin-bottom: 0.8rem;
+        }
+
+        .user-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-info p {
+            font-size: 0.8rem;
+            color: var(--light-gray);
+        }
+
+        .user-status {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            border-radius: 20px;
+            margin-top: 0.3rem;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 100, 0.2);
+            color: #00ff64;
+        }
+
+        .status-blocked {
+            background: rgba(255, 58, 94, 0.2);
+            color: var(--danger-red);
+        }
+
+        /* Botones de Acción */
+        .user-actions {
+            display: flex;
+            gap: 0.7rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .edit-btn {
+            background: rgba(0, 168, 255, 0.2);
+            color: var(--neon-blue);
+        }
+
+        .edit-btn:hover {
+            background: rgba(0, 168, 255, 0.4);
+        }
+
+        .block-btn {
+            background: rgba(255, 204, 0, 0.2);
+            color: var(--warning-yellow);
+        }
+
+        .block-btn:hover {
+            background: rgba(255, 204, 0, 0.4);
+        }
+
+        .delete-btn {
+            background: rgba(255, 58, 94, 0.2);
+            color: var(--danger-red);
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 58, 94, 0.4);
+        }
+
+        /* Botón Salir (abajo) */
+        .logout-container {
+            text-align: center;
+            padding: 1.5rem;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--dark-bg);
+            border-top: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .logout-btn {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn:hover {
+            background: rgba(247, 0, 255, 0.1);
+            box-shadow: 0 0 20px rgba(247, 0, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .user-management {
+                flex-direction: column;
+                padding: 1.5rem;
+            }
+
+            .admin-header {
+                padding: 1.5rem;
+            }
+
+            .users-column {
+                margin-bottom: 1rem;
+            }
+
+            .logout-container {
+                position: static;
+                margin-top: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <img src="/img/logo-idet-400.png" alt="IDET" class="logo">
+    </header>
+
+    <!-- Título con efecto neon -->
+    <div class="welcome-message">
+        <div class="welcome-text">Gestión de Usuarios</div>
+        <div class="admin-role">Modo: Administrador Principal</div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="user-management">
+        <!-- Columna Administradores -->
+        <section class="users-column admin-column">
+            <h2 class="column-title">
+                <i class="fas fa-user-shield"></i> Administradores
+            </h2>
+
+            <!-- Fichas dinámicas se insertarán aquí -->
+            <div id="admin-users-container"></div>
+        </section>
+
+        <!-- Columna Clientes -->
+        <section class="users-column client-column">
+            <h2 class="column-title">
+                <i class="fas fa-users"></i> Clientes
+            </h2>
+
+            <!-- Fichas dinámicas se insertarán aquí -->
+            <div id="client-users-container"></div>
+        </section>
+    </main>
+
+    <!-- Botón Salir (abajo) -->
+    <div class="logout-container">
+        <button class="logout-btn" onclick="window.location.href='/EditorHome.html'">
+            <i class="fas fa-sign-out-alt"></i> Volver al Panel
+        </button>
+    </div>
+    <script>
+        // Datos de ejemplo (en producción vendrían de una API)
+        const users = {
+            admins: [
+                { id: 1, name: "Dra. María López", email: "maria.lopez@idet.com", role: "Superadmin", status: "active" },
+                { id: 2, name: "Dr. Carlos Ruiz", email: "carlos.ruiz@idet.com", role: "Administrador", status: "active" },
+                { id: 3, name: "Lic. Ana Vargas", email: "ana.vargas@idet.com", role: "Soporte", status: "active" }
+            ],
+            clients: [
+                { id: 101, name: "Juan Pérez", email: "juan.perez@outlook.com", membership: "Premium", status: "blocked" },
+                { id: 102, name: "Laura González", email: "laura.gonzalez@yahoo.com", membership: "Básico", status: "active" },
+                { id: 103, name: "Roberto Sánchez", email: "roberto.sanchez@gmail.com", membership: "Premium", status: "active" },
+                { id: 104, name: "Marta Ramírez", email: "marta.ramirez@hotmail.com", membership: "Gratuito", status: "active" }
+            ]
+        };
+
+        // Renderizar usuarios
+        function renderUsers() {
+            const adminContainer = document.getElementById('admin-users-container');
+            const clientContainer = document.getElementById('client-users-container');
+
+            // Limpiar contenedores
+            adminContainer.innerHTML = '';
+            clientContainer.innerHTML = '';
+
+            // Generar fichas de administradores
+            users.admins.forEach(user => {
+                adminContainer.innerHTML += `
+                    <div class="user-card admin-card" data-id="${user.id}">
+                        <div class="user-header">
+                            <div class="user-info">
+                                <h3>${user.name}</h3>
+                                <p>${user.email}</p>
+                                <p><small>Tipo: ${user.role}</small></p>
+                                <span class="user-status ${user.status === 'active' ? 'status-active' : 'status-blocked'}">
+                                    ${user.status === 'active' ? 'Activo' : 'Bloqueado'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="user-actions">
+                            <button class="action-btn edit-btn" onclick="editUser(${user.id}, 'admin')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="action-btn block-btn" onclick="toggleBlock(${user.id}, 'admin')">
+                                <i class="fas ${user.status === 'active' ? 'fa-lock' : 'fa-unlock'}"></i>
+                                ${user.status === 'active' ? 'Bloquear' : 'Desbloquear'}
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteUser(${user.id}, 'admin')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Generar fichas de clientes
+            users.clients.forEach(user => {
+                clientContainer.innerHTML += `
+                    <div class="user-card client-card" data-id="${user.id}">
+                        <div class="user-header">
+                            <div class="user-info">
+                                <h3>${user.name}</h3>
+                                <p>${user.email}</p>
+                                <p><small>Membresía: ${user.membership}</small></p>
+                                <span class="user-status ${user.status === 'active' ? 'status-active' : 'status-blocked'}">
+                                    ${user.status === 'active' ? 'Activo' : 'Bloqueado'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="user-actions">
+                            <button class="action-btn edit-btn" onclick="editUser(${user.id}, 'client')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="action-btn block-btn" onclick="toggleBlock(${user.id}, 'client')">
+                                <i class="fas ${user.status === 'active' ? 'fa-lock' : 'fa-unlock'}"></i>
+                                ${user.status === 'active' ? 'Bloquear' : 'Desbloquear'}
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteUser(${user.id}, 'client')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Funciones de gestión
+        function editUser(id, type) {
+            const user = type === 'admin'
+                ? users.admins.find(u => u.id === id)
+                : users.clients.find(u => u.id === id);
+
+            alert(`Editando usuario:\nNombre: ${user.name}\nEmail: ${user.email}\n\n(En producción se abriría un formulario)`);
+        }
+
+        function toggleBlock(id, type) {
+            const userArray = type === 'admin' ? users.admins : users.clients;
+            const user = userArray.find(u => u.id === id);
+
+            user.status = user.status === 'active' ? 'blocked' : 'active';
+            renderUsers();
+
+            // Efecto visual
+            const card = document.querySelector(`.user-card[data-id="${id}"]`);
+            card.style.boxShadow = `0 0 20px ${type === 'admin' ? 'rgba(0, 168, 255, 0.5)' : 'rgba(247, 0, 255, 0.5)'}`;
+            setTimeout(() => {
+                card.style.boxShadow = '';
+            }, 1000);
+        }
+
+        function deleteUser(id, type) {
+            if (confirm('¿Estás seguro de eliminar este usuario?')) {
+                if (type === 'admin') {
+                    users.admins = users.admins.filter(u => u.id !== id);
+                } else {
+                    users.clients = users.clients.filter(u => u.id !== id);
+                }
+                renderUsers();
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', renderUsers);
+    </script>
+</body>
+</html>

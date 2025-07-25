@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - IDET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --neon-blue: #00a8ff;
+            --neon-pink: #f700ff;
+            --accent-blue: #0077b6;
+            --light-gray: #94a3b8;
+            --white: #f1f5f9;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --led-glow: 0 0 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(247, 0, 255, 0.15) 0%, transparent 50%);
+        }
+
+        /* Header Futurista */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--neon-blue),
+                var(--neon-pink),
+                transparent);
+            animation: ledScan 4s linear infinite;
+        }
+
+        @keyframes ledScan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            height: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .welcome-message {
+            text-align: right;
+            position: relative;
+        }
+
+        .welcome-text {
+            font-size: 1.1rem;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
+            animation: textGlow 2s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 5px var(--neon-blue); }
+            to { text-shadow: 0 0 15px var(--neon-pink); }
+        }
+
+        .admin-role {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+
+        /* Main Content */
+        .main-container {
+            padding: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--white), var(--neon-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), transparent);
+            animation: lineExpand 1.5s ease-out infinite;
+        }
+
+        @keyframes lineExpand {
+            0% { width: 0%; opacity: 0; }
+            50% { width: 100%; opacity: 1; }
+            100% { width: 0%; opacity: 0; left: 100%; }
+        }
+
+        /* Carrusel 3D Futurista */
+        .carousel-container {
+            perspective: 1000px;
+            height: 350px;
+            margin: 3rem auto;
+            position: relative;
+        }
+
+        .carousel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .carousel-item {
+            position: absolute;
+            width: 240px;
+            height: 300px;
+            left: 50%;
+            top: 50%;
+            margin-left: -120px;
+            margin-top: -150px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .carousel-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            animation: ledFlow 3s linear infinite;
+        }
+
+        @keyframes ledFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .carousel-item:hover {
+            transform: scale(1.08) translateZ(30px);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.5),
+                        0 0 60px rgba(247, 0, 255, 0.3);
+        }
+
+        .carousel-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--neon-blue);
+            transition: all 0.3s ease;
+            filter: drop-shadow(var(--led-glow) var(--neon-blue));
+        }
+
+        .carousel-item:hover .carousel-icon {
+            transform: scale(1.2);
+            color: var(--neon-pink);
+            filter: drop-shadow(var(--led-glow) var(--neon-pink));
+        }
+
+        .carousel-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .carousel-desc {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+            text-align: center;
+            padding: 0 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Navigation Buttons */
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 2.5rem 0;
+        }
+
+        .nav-btn {
+            padding: 0.9rem 2rem;
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent,
+                transparent,
+                transparent,
+                var(--neon-blue)
+            );
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 245, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+            transform: translateY(-3px);
+            color: var(--white);
+        }
+
+        .nav-btn:hover::before {
+            animation: btnGlow 1.5s linear infinite;
+        }
+
+        @keyframes btnGlow {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+
+        /* Normativas */
+        .policies {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-top: 3rem;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .policies-title {
+            font-size: 1.6rem;
+            margin-bottom: 1.8rem;
+            color: var(--neon-blue);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .policies-title::before {
+            content: '';
+            width: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+        }
+
+        .policy-item {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1.2rem;
+            align-items: flex-start;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .policy-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .policy-icon {
+            color: var(--neon-blue);
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+        }
+
+        .policy-text {
+            flex: 1;
+            color: var(--light-gray);
+            line-height: 1.7;
+        }
+
+        .policy-text strong {
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        /* Modal Futurista */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            padding: 3rem;
+            position: relative;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 40px rgba(0, 245, 255, 0.3),
+                        0 0 80px rgba(247, 0, 255, 0.2);
+            animation: modalFadeIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(0, 245, 255, 0.05),
+                rgba(247, 0, 255, 0.05)
+            );
+            pointer-events: none;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.5rem;
+            font-size: 1.8rem;
+            color: var(--light-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .close-modal:hover {
+            color: var(--neon-pink);
+            transform: rotate(90deg) scale(1.1);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--neon-blue);
+            position: relative;
+            display: inline-block;
+        }
+
+        .modal-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), transparent);
+        }
+
+        .modal-text {
+            color: var(--light-gray);
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            font-size: 1rem;
+        }
+
+        .modal-btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.4);
+            z-index: 1;
+        }
+
+        .modal-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(247, 0, 255, 0.5);
+        }
+
+        .modal-btn:hover::before {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                padding: 1.5rem;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .main-container {
+                padding: 1.5rem;
+            }
+
+            .carousel-container {
+                height: 300px;
+                perspective: 800px;
+            }
+
+            .carousel-item {
+                width: 200px;
+                height: 260px;
+                margin-left: -100px;
+                margin-top: -130px;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .policies {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Futurista -->
+    <header class="admin-header">
+        <div class="logo-container">
+            <img src="/img/logo-idet-400.png" alt="IDET" class="logo">
+        </div>
+
+        <div class="welcome-message">
+            <div class="welcome-text">Sistema de Administración IDET v4.2</div>
+            <div class="admin-role">Modo: Administrador Principal</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <h1 class="section-title">Panel de Control</h1>
+
+        <!-- Carrusel 3D Futurista -->
+        <div class="carousel-container">
+            <div class="carousel" id="carousel">
+                <!-- Items generados por JS -->
+            </div>
+        </div>
+
+        <div class="carousel-nav">
+            <button class="nav-btn" id="prevBtn"><i class="fas fa-chevron-left"></i> Anterior</button>
+            <button class="nav-btn" id="nextBtn">Siguiente <i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Normativas con LED Effect -->
+        <div class="policies">
+            <h2 class="policies-title">Protocolos del Sistema</h2>
+
+            <div class="policy-item">
+                <i class="fas fa-shield-alt policy-icon"></i>
+                <p class="policy-text">
+                    <strong>Confidencialidad:</strong> Todo el personal administrativo debe mantener la confidencialidad de los datos de pacientes y colegas según las leyes HIPAA y regulaciones locales.
+                </p>
+            </div>
+
+            <div class="policy-item">
+                <i class="fas fa-user-lock policy-icon"></i>
+                <p class="policy-text">
+                    <strong>Accesos:</strong> Cada administrador es responsable de sus credenciales de acceso. No compartir contraseñas y cambiarlas cada 90 días.
+                </p>
+            </div>
+
+            <div class="policy-item">
+                <i class="fas fa-history policy-icon"></i>
+                <p class="policy-text">
+                    <strong>Registros:</strong> Todas las modificaciones al sistema quedan registradas con fecha, hora y usuario responsable.
+                </p>
+            </div>
+
+            <div class="policy-item">
+                <i class="fas fa-exclamation-triangle policy-icon"></i>
+                <p class="policy-text">
+                    <strong>Emergencias:</strong> En caso de fallos del sistema, contactar inmediatamente al equipo de soporte técnico mediante el canal #emergencias en Slack o al teléfono de guardia.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Futurista -->
+    <div class="modal" id="serviceModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Editor de Contenido</h2>
+            <p class="modal-text" id="modalText">
+                Módulo completo para gestionar todo el contenido público de la clínica. Incluye editor WYSIWYG para textos, gestor de imágenes y documentos, programación de publicaciones y control de versiones. Podrás modificar las secciones de Homepage, Directorio Médico, Servicios y Contactos con previsualización en tiempo real.
+            </p>
+            <a href="#" class="modal-btn" id="modalBtn">Acceder al Módulo</a>
+        </div>
+    </div>
+
+    <script>
+        // Datos del carrusel con enlaces actualizados
+        const carouselItems = [
+            {
+                title: "Editor de Contenido",
+                icon: "fa-edit",
+                description: "Gestión completa del contenido público de la clínica. Modifica textos, imágenes y estructura de todas las secciones.",
+                link: "/Editor.html"
+            },
+            {
+                title: "Gestión de Usuarios",
+                icon: "fa-users-cog",
+                description: "Administra todos los usuarios del sistema. Crea nuevos administradores o gestiona permisos de usuarios comunes.",
+                link: "/GestionUsuarios.html"
+            },
+            {
+                title: "Mensajería",
+                icon: "fa-comments",
+                description: "Sistema de comunicación interno y con pacientes. Bandeja de entrada, envíos masivos y plantillas predefinidas.",
+                link: "/MensajeriaA.html"
+            },
+            {
+                title: "Analíticas",
+                icon: "fa-chart-line",
+                description: "Reportes detallados y dashboards interactivos para seguimiento de métricas clave.",
+                link: "/Analitica.html"
+            }
+        ];
+
+        // Variables del carrusel
+        const carousel = document.getElementById('carousel');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const modal = document.getElementById('serviceModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalText = document.getElementById('modalText');
+        const modalBtn = document.getElementById('modalBtn');
+        const closeModal = document.getElementById('closeModal');
+
+        let currentAngle = 0;
+        const radius = 350;
+        const count = carouselItems.length;
+        const angleStep = 360 / count;
+
+        // Crear items del carrusel
+        carouselItems.forEach((item, index) => {
+            const carouselItem = document.createElement('div');
+            carouselItem.className = 'carousel-item';
+            carouselItem.innerHTML = `
+                <i class="fas ${item.icon} carousel-icon"></i>
+                <h3 class="carousel-title">${item.title}</h3>
+                <p class="carousel-desc">${item.description}</p>
+            `;
+
+            // Posicionar en 3D
+            updateCarouselItemPosition(carouselItem, index);
+
+            // Evento click
+            carouselItem.addEventListener('click', () => {
+                openModal(item);
+            });
+
+            carousel.appendChild(carouselItem);
+        });
+
+        // Actualizar posición de los items
+        function updateCarouselItemPosition(item, index) {
+            const angle = index * angleStep + currentAngle;
+            const rad = angle * Math.PI / 180;
+
+            item.style.transform = `
+                rotateY(${angle}deg)
+                translateZ(${radius}px)
+                rotateY(${-angle}deg)
+            `;
+
+            // Efecto de profundidad
+            const z = Math.cos(rad) * radius;
+            const depth = (z + radius) / (2 * radius);
+            item.style.opacity = 0.7 + depth * 0.3;
+            item.style.zIndex = Math.floor(depth * 100);
+        }
+
+        // Rotar carrusel
+        function rotateCarousel(step) {
+            currentAngle += step;
+
+            document.querySelectorAll('.carousel-item').forEach((item, index) => {
+                updateCarouselItemPosition(item, index);
+            });
+        }
+
+        // Abrir modal
+        function openModal(item) {
+            modalTitle.textContent = item.title;
+            modalText.textContent = item.description;
+            modalBtn.href = item.link;
+            modalBtn.textContent = `Acceder a ${item.title}`;
+            modal.style.display = 'flex';
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', () => rotateCarousel(-angleStep));
+        nextBtn.addEventListener('click', () => rotateCarousel(angleStep));
+        closeModal.addEventListener('click', () => modal.style.display = 'none');
+
+        // Cerrar modal al hacer click fuera
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Rotación automática
+        let autoRotate = setInterval(() => {
+            rotateCarousel(angleStep / 20);
+        }, 100);
+
+        // Pausar al interactuar
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(autoRotate);
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            autoRotate = setInterval(() => {
+                rotateCarousel(angleStep / 20);
+            }, 100);
+        });
+
+        // Inicializar
+        rotateCarousel(0);
+
+        // Efecto de consola al cargar
+        console.log('%cSistema Administrativo IDET v4.2', 'color: #00f5ff; font-size: 16px;');
+        console.log('%cModo: Administrador Principal', 'color: #f700ff;');
+        console.log('%cAcceso autorizado', 'color: #64ffda;');
+    </script>
+</body>
+</html>

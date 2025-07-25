@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensajería - IDET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --neon-blue: #00a8ff;
+            --neon-pink: #f700ff;
+            --accent-blue: #0077b6;
+            --light-gray: #94a3b8;
+            --white: #f1f5f9;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --led-glow: 0 0 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(247, 0, 255, 0.15) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--neon-blue),
+                var(--neon-pink),
+                transparent);
+            animation: ledScan 4s linear infinite;
+        }
+
+        @keyframes ledScan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .back-button {
+            color: var(--white);
+            margin-left: 1rem;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            color: var(--neon-blue);
+            transform: translateX(-3px);
+        }
+
+        .welcome-message {
+            text-align: right;
+            position: relative;
+        }
+
+        .welcome-text {
+            font-size: 1.1rem;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
+            animation: textGlow 2s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 5px var(--neon-blue); }
+            to { text-shadow: 0 0 15px var(--neon-pink); }
+        }
+
+        /* Main Content */
+        .main-container {
+            display: flex;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 2rem;
+            height: calc(100vh - 100px);
+        }
+
+        /* Lista de contactos */
+        .contacts-container {
+            width: 350px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contacts-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+        }
+
+        .contacts-title {
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .contacts-title i {
+            font-size: 1.3rem;
+        }
+
+        .search-bar {
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 30px;
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-blue);
+        }
+
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .contact-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.3), transparent);
+        }
+
+        .contact-item:hover {
+            background: rgba(0, 245, 255, 0.1);
+        }
+
+        .contact-item.active {
+            background: rgba(0, 245, 255, 0.2);
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .contact-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .contact-lastmsg {
+            font-size: 0.8rem;
+            color: var(--light-gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-time {
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+        }
+
+        /* Área de chat */
+        .chat-container {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--neon-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .chat-user-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .chat-user-info p {
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+        }
+
+        .chat-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            margin-left: auto;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            max-width: 70%;
+        }
+
+        .message.received {
+            margin-right: auto;
+        }
+
+        .message.sent {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 0.8rem 1.2rem;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.received .message-content {
+            background: rgba(0, 245, 255, 0.1);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.sent .message-content {
+            background: rgba(0, 245, 255, 0.2);
+            border-bottom-right-radius: 5px;
+            color: var(--white);
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--light-gray);
+            margin-top: 0.3rem;
+        }
+
+        .chat-input {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0, 245, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 30px;
+            color: var(--white);
+            font-size: 0.95rem;
+            margin-right: 1rem;
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
+        }
+
+        /* Estado inicial */
+        .no-chat-selected {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .no-chat-selected i {
+            font-size: 3rem;
+            color: var(--neon-blue);
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .no-chat-selected h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .no-chat-selected p {
+            color: var(--light-gray);
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        /* Sin contactos */
+        .no-contacts {
+            text-align: center;
+            padding: 2rem;
+            color: var(--light-gray);
+        }
+
+        .no-contacts i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-contacts p {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .contacts-container {
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="logo-container">
+            <img src="img/logo-idet-400.png" alt="IDET" class="logo">
+            <a href="InicioS.html" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+
+        <div class="welcome-message">
+            <div class="welcome-text">Mensajería Administrativa</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Lista de contactos -->
+        <div class="contacts-container">
+            <div class="contacts-header">
+                <h2 class="contacts-title"><i class="fas fa-users"></i> Mensajes Recibidos</h2>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar contactos..." id="searchInput">
+                </div>
+            </div>
+
+            <div class="contacts-list" id="contactsList">
+                <!-- Los contactos se cargarán dinámicamente -->
+                <div class="no-contacts">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <p>Cargando mensajes...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de chat -->
+        <div class="chat-container">
+            <div id="chatArea">
+                <!-- Estado inicial -->
+                <div class="no-chat-selected">
+                    <i class="fas fa-comment-dots"></i>
+                    <h3>Selecciona una conversación</h3>
+                    <p>Elige un contacto de la lista para comenzar a chatear o enviar mensajes importantes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Conexión simulada a base de datos
+        async function fetchMessages() {
+            // En un sistema real, aquí iría una llamada a tu backend
+            // Simulamos un retraso de red
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            // Simulación: estos serían los usuarios reales que te han escrito
+            return [
+                {
+                    id: 101,
+                    name: "Paciente: María González",
+                    lastMsg: "Consulta sobre mi cita médica",
+                    timestamp: new Date(Date.now() - 3600000).toISOString(),
+                    avatarText: "MG",
+                    unread: true,
+                    messages: [
+                        {
+                            text: "Buenos días, quería confirmar mi cita de mañana",
+                            time: "10:30 AM",
+                            sent: false
+                        }
+                    ]
+                },
+                {
+                    id: 102,
+                    name: "Dr. Carlos Méndez",
+                    lastMsg: "Resultados de laboratorio",
+                    timestamp: new Date(Date.now() - 86400000).toISOString(),
+                    avatarText: "CM",
+                    unread: false,
+                    messages: [
+                        {
+                            text: "Los análisis del paciente están listos",
+                            time: "Ayer, 3:45 PM",
+                            sent: false
+                        },
+                        {
+                            text: "Gracias, los revisaré esta tarde",
+                            time: "Ayer, 4:20 PM",
+                            sent: true
+                        }
+                    ]
+                },
+                {
+                    id: 103,
+                    name: "Usuario Web: Luis Pérez",
+                    lastMsg: "Consulta sobre servicios",
+                    timestamp: new Date(Date.now() - 172800000).toISOString(),
+                    avatarText: "LP",
+                    unread: false,
+                    messages: [
+                        {
+                            text: "¿Qué especialidades tienen disponibles?",
+                            time: "Lunes, 11:20 AM",
+                            sent: false
+                        },
+                        {
+                            text: "Tenemos todas las especialidades médicas principales",
+                            time: "Lunes, 11:45 AM",
+                            sent: true
+                        }
+                    ]
+                }
+            ];
+        }
+
+        // Renderizar contactos reales
+        async function renderRealContacts() {
+            const contactsList = document.getElementById('contactsList');
+            const messages = await fetchMessages();
+
+            if (messages.length === 0) {
+                contactsList.innerHTML = `
+                    <div class="no-contacts">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <p>No hay mensajes nuevos</p>
+                    </div>
+                `;
+                return;
+            }
+
+            contactsList.innerHTML = '';
+
+            messages.forEach(contact => {
+                const contactItem = document.createElement('div');
+                contactItem.className = `contact-item ${contact.unread ? 'unread' : ''}`;
+                contactItem.setAttribute('data-id', contact.id);
+
+                const lastMsgDate = new Date(contact.timestamp);
+                const timeString = lastMsgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateString = lastMsgDate.toLocaleDateString();
+
+                contactItem.innerHTML = `
+                    <div class="contact-avatar">${contact.avatarText}</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${contact.name}</div>
+                        <div class="contact-lastmsg">${contact.lastMsg}</div>
+                    </div>
+                    <div class="contact-time">${timeString}</div>
+                `;
+
+                contactItem.addEventListener('click', () => {
+                    // Marcar como leído
+                    contact.unread = false;
+                    contactItem.classList.remove('unread');
+
+                    // Cargar conversación
+                    loadConversation(contact);
+                });
+
+                contactsList.appendChild(contactItem);
+            });
+        }
+
+        // Cargar conversación
+        async function loadConversation(contact) {
+            const chatArea = document.getElementById('chatArea');
+
+            chatArea.innerHTML = `
+                <div class="chat-header">
+                    <div class="chat-user">
+                        <div class="chat-user-avatar">${contact.avatarText}</div>
+                        <div class="chat-user-info">
+                            <h3>${contact.name}</h3>
+                            <p>${contact.unread ? 'En línea' : 'Visto recientemente'}</p>
+                        </div>
+                    </div>
+                    <div class="chat-status"></div>
+                </div>
+
+                <div class="chat-messages" id="messagesContainer">
+                    ${contact.messages.map(msg => `
+                        <div class="message ${msg.sent ? 'sent' : 'received'}">
+                            <div class="message-content">${msg.text}</div>
+                            <div class="message-time">${msg.time}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="chat-input">
+                    <input type="text" placeholder="Escribe un mensaje..." id="messageInput">
+                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            `;
+
+            // Auto-scroll al final
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Configurar envío de mensajes
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            function sendMessage() {
+                const input = document.getElementById('messageInput');
+                const messageText = input.value.trim();
+
+                if (messageText) {
+                    // En un sistema real, aquí enviarías el mensaje al backend
+                    const newMessage = {
+                        text: messageText,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        sent: true
+                    };
+
+                    // Agregar a la conversación (simulación)
+                    contact.messages.push(newMessage);
+
+                    // Actualizar la vista
+                    loadConversation(contact);
+
+                    // Limpiar input
+                    input.value = '';
+
+                    // Simular respuesta (en un sistema real esto vendría por WebSockets)
+                    setTimeout(() => {
+                        const replies = [
+                            "Gracias por su mensaje",
+                            "¿Necesita alguna otra información?",
+                            "Voy a revisar su consulta",
+                            "Le responderé en breve",
+                            "¿Podría darme más detalles?"
+                        ];
+
+                        const replyMessage = {
+                            text: replies[Math.floor(Math.random() * replies.length)],
+                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            sent: false
+                        };
+
+                        contact.messages.push(replyMessage);
+                        loadConversation(contact);
+                    }, 1500);
+                }
+            }
+        }
+
+        // Búsqueda en tiempo real
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.contact-item');
+
+            let hasResults = false;
+
+            items.forEach(item => {
+                const name = item.querySelector('.contact-name').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Mostrar mensaje si no hay resultados
+            if (!hasResults) {
+                const noResults = document.createElement('div');
+                noResults.className = 'no-contacts';
+                noResults.innerHTML = `
+                    <i class="fas fa-search-minus"></i>
+                    <p>No se encontraron contactos</p>
+                `;
+
+                const list = document.getElementById('contactsList');
+                if (!list.querySelector('.no-contacts')) {
+                    list.appendChild(noResults);
+                }
+            } else {
+                const noResults = document.querySelector('.no-contacts');
+                if (noResults) noResults.remove();
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRealContacts();
+
+            // Simular actualización en tiempo real (en producción sería WebSockets)
+            setInterval(async () => {
+                console.log("Actualizando mensajes...");
+                await renderRealContacts();
+            }, 30000); // Cada 30 segundos
+        });
+    </script>
+</body>
+</html>

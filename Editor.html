@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Pantallas - IDET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --neon-blue: #00a8ff;
+            --neon-pink: #f700ff;
+            --accent-blue: #0077b6;
+            --light-gray: #94a3b8;
+            --white: #f1f5f9;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --led-glow: 0 0 15px;
+            --danger-red: #ff3a5e;
+            --warning-yellow: #ffcc00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(247, 0, 255, 0.15) 0%, transparent 50%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .admin-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        /* Título con efecto neon */
+        .welcome-message {
+            text-align: center;
+            margin: 1rem 0 2rem;
+        }
+
+        .welcome-text {
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
+            animation: textGlow 2s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 5px var(--neon-blue); }
+            to { text-shadow: 0 0 15px var(--neon-pink); }
+        }
+
+        .admin-role {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+
+        /* Contenedor Principal */
+        .editor-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        /* Paneles de Edición */
+        .edit-panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .edit-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            animation: ledFlow 3s linear infinite;
+        }
+
+        @keyframes ledFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .panel-icon {
+            font-size: 1.2rem;
+        }
+
+        .panel-content {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Scrollbar personalizada */
+        .panel-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .panel-content::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 10px;
+        }
+
+        /* Formularios de edición */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--light-gray);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Sección de imágenes */
+        .image-upload {
+            border: 2px dashed rgba(0, 245, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 245, 255, 0.05);
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--danger-red);
+            color: white;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        /* Botones de acción */
+        .panel-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            color: var(--dark-bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(247, 0, 255, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 245, 255, 0.1);
+        }
+
+        /* Modal de previsualización */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .preview-content {
+            width: 90%;
+            height: 90%;
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-blue);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid var(--neon-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-iframe {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+
+        .close-preview {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--neon-pink);
+        }
+
+        /* Advertencia y footer */
+        .warning-message {
+            text-align: center;
+            padding: 1.5rem;
+            margin: 1rem 1.5rem;
+            background: rgba(255, 58, 94, 0.1);
+            border: 1px solid var(--danger-red);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--light-gray);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .logout-btn {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(247, 0, 255, 0.1);
+            box-shadow: 0 0 20px rgba(247, 0, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-header {
+                padding: 1.5rem;
+            }
+
+            .welcome-text {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <img src="/img/logo-idet-400.png" alt="IDET" class="logo">
+    </header>
+
+    <!-- Título -->
+    <div class="welcome-message">
+        <div class="welcome-text">Editor de Contenido</div>
+        <div class="admin-role">Modo: Administrador Principal - Edición de pantallas</div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="editor-container">
+        <!-- Panel Homepage -->
+        <div class="edit-panel">
+            <div class="panel-header">
+                <h3 class="panel-title">
+                    <i class="fas fa-home panel-icon"></i> Homepage
+                </h3>
+            </div>
+
+            <div class="panel-content">
+                <div class="form-group">
+                    <label for="home-title">Título Principal</label>
+                    <input type="text" id="home-title" class="form-control" value="Clinica IDET Barquisimeto">
+                </div>
+
+                <div class="form-group">
+                    <label for="home-subtitle">Subtítulo</label>
+                    <input type="text" id="home-subtitle" class="form-control" value="¿Quiénes somos?">
+                </div>
+
+                <div class="form-group">
+                    <label for="home-content1">Contenido Párrafo 1</label>
+                    <textarea id="home-content1" class="form-control">En Clinica IDET Barquisimeto, somos más que una clínica: somos un equipo humano comprometido con la salud y bienestar de nuestros pacientes. Con años de experiencia en el sector médico, ofrecemos atención especializada, tecnología avanzada y un enfoque multidisciplinario para cuidar de ti y tu familia en todas las etapas de la vida.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="home-content2">Contenido Párrafo 2</label>
+                    <textarea id="home-content2" class="form-control">Somos una red de salud integral en Barquisimeto, conformada por médicos altamente capacitados en diversas especialidades, desde diagnóstico por imágenes hasta tratamientos quirúrgicos y seguimiento personalizado. Nos distinguimos por la calidez, el profesionalismo y la innovación en cada servicio.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="home-content3">Contenido Párrafo 3</label>
+                    <textarea id="home-content3" class="form-control">Revisa nuestro directorio médico y agenda tu cita en el cajetín de reservas. Si tienes alguna duda sobre qué servicios prestamos, también puedes revisar nuestro directorio de servicios. Y si nos quieres contactar, en la opción de contacto obtendrás toda la información. Gracias por visitar Clinica IDET Barquisimeto y recuerda que nuestra atención está en tu salud.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="home-link">Enlace Grupo IDET</label>
+                    <input type="text" id="home-link" class="form-control" value="https://grupoidet.com/">
+                </div>
+
+                <div class="form-group">
+                    <label>Imágenes del Carrusel (5 imágenes)</label>
+                    <div class="image-upload" id="carousel-upload-area">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                        <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
+                        <input type="file" id="carousel-upload" multiple style="display: none;" accept="image/*">
+                    </div>
+
+                    <div class="image-preview" id="carousel-preview">
+                        <div class="preview-item">
+                            <img src="img/1.png" alt="Preview 1">
+                            <div class="remove-image"><i class="fas fa-times"></i></div>
+                        </div>
+                        <div class="preview-item">
+                            <img src="img/2.png" alt="Preview 2">
+                            <div class="remove-image"><i class="fas fa-times"></i></div>
+                        </div>
+                        <div class="preview-item">
+                            <img src="img/3.png" alt="Preview 3">
+                            <div class="remove-image"><i class="fas fa-times"></i></div>
+                        </div>
+                        <div class="preview-item">
+                            <img src="img/4.png" alt="Preview 4">
+                            <div class="remove-image"><i class="fas fa-times"></i></div>
+                        </div>
+                        <div class="preview-item">
+                            <img src="img/5.png" alt="Preview 5">
+                            <div class="remove-image"><i class="fas fa-times"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-actions">
+                <button class="btn btn-outline" id="preview-home">
+                    <i class="fas fa-eye"></i> Previsualizar
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel Directorio Médico -->
+        <div class="edit-panel">
+            <div class="panel-header">
+                <h3 class="panel-title">
+                    <i class="fas fa-user-md panel-icon"></i> Directorio Médico
+                </h3>
+                <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" id="add-doctor">
+                    <i class="fas fa-plus"></i> Nuevo Doctor
+                </button>
+            </div>
+
+            <div class="panel-content">
+                <div class="form-group">
+                    <label>Fichas Médicas Existentes (16 doctores)</label>
+                    <select class="form-control" id="doctor-select">
+                        <option value="">Seleccione un médico para editar</option>
+                        <option value="1">Dr. Carlos Angulo - Neurocirujano</option>
+                        <option value="2">Dr. Carlos Leon - Angiólogo</option>
+                        <option value="3">Dra. Alicia Medina - Angióloga</option>
+                        <option value="4">Dr. Avendaño - Cardiólogo</option>
+                        <option value="5">Dr. Arturo - Cirujano Cardiólogo</option>
+                        <option value="6">Dr. Adelis Oviedo - Médico Ocupacional</option>
+                        <option value="7">Dra. Yolmar Gutierrez - Médico General</option>
+                        <option value="8">Dr. Felix - Médico General</option>
+                        <option value="9">Dr. Luis Torres - Neumólogo</option>
+                        <option value="10">Dra. Ana Morales - Neumóloga</option>
+                        <option value="11">Dra. Sofia Ramirez - Pediatra</option>
+                        <option value="12">Dr. Jorge Lopez - Pediatra</option>
+                        <option value="13">Dra. Laura Fernandez - Dermatóloga</option>
+                        <option value="14">Dr. Roberto Mendoza - Gastroenterólogo</option>
+                        <option value="15">Dra. Patricia Herrera - Oftalmóloga</option>
+                        <option value="16">Dr. Miguel Sánchez - Endocrinólogo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-name">Nombre del Médico</label>
+                    <input type="text" id="doctor-name" class="form-control" placeholder="Ej: Dr. Juan Pérez">
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-specialty">Especialidad</label>
+                    <input type="text" id="doctor-specialty" class="form-control" placeholder="Ej: Cardiólogo">
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-schedule">Horario</label>
+                    <input type="text" id="doctor-schedule" class="form-control" placeholder="Ej: Lun-Vie | 8am-4pm">
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-description">Descripción</label>
+                    <textarea id="doctor-description" class="form-control" placeholder="Descripción profesional..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Icono de Especialidad</label>
+                    <select class="form-control" id="doctor-icon">
+                        <option value="fa-brain">Neurocirugía</option>
+                        <option value="fa-heartbeat">Angiología</option>
+                        <option value="fa-heart">Cardiología</option>
+                        <option value="fa-briefcase-medical">Medicina Ocupacional</option>
+                        <option value="fa-user-md">Medicina General</option>
+                        <option value="fa-lungs">Neumología</option>
+                        <option value="fa-baby">Pediatría</option>
+                        <option value="fa-sun">Dermatología</option>
+                        <option value="fa-utensils">Gastroenterología</option>
+                        <option value="fa-eye">Oftalmología</option>
+                        <option value="fa-flask">Endocrinología</option>
+                        <option value="fa-bone">Traumatología</option>
+                        <option value="fa-kidneys">Urología</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="panel-actions">
+                <button class="btn btn-outline" id="delete-doctor">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+                <button class="btn btn-primary" id="save-doctor">
+                    <i class="fas fa-save"></i> Guardar Médico
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel Servicios -->
+        <div class="edit-panel">
+            <div class="panel-header">
+                <h3 class="panel-title">
+                    <i class="fas fa-procedures panel-icon"></i> Servicios
+                </h3>
+                <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" id="add-service">
+                    <i class="fas fa-plus"></i> Nuevo Servicio
+                </button>
+            </div>
+
+            <div class="panel-content">
+                <div class="form-group">
+                    <label>Servicios Existentes (21 servicios)</label>
+                    <select class="form-control" id="service-select">
+                        <option value="">Seleccione un servicio para editar</option>
+                        <option value="1">Neurocirugía</option>
+                        <option value="2">Medicina Ocupacional</option>
+                        <option value="3">Traumatología</option>
+                        <option value="4">Medicina General</option>
+                        <option value="5">Ginecología</option>
+                        <option value="6">Mastología</option>
+                        <option value="7">Cirugía Plástica</option>
+                        <option value="8">Cardiología</option>
+                        <option value="9">Urología</option>
+                        <option value="10">Emergencia</option>
+                        <option value="11">Imagenología</option>
+                        <option value="12">Laboratorio</option>
+                        <option value="13">Quirófano</option>
+                        <option value="14">Psicología</option>
+                        <option value="15">Angiología</option>
+                        <option value="16">Oftalmología</option>
+                        <option value="17">Pediatría</option>
+                        <option value="18">Farmacia</option>
+                        <option value="19">Hospitalización</option>
+                        <option value="20">Otorrinolaringología</option>
+                        <option value="21">Gastroenterología</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="service-name">Nombre del Servicio</label>
+                    <input type="text" id="service-name" class="form-control" placeholder="Ej: Cardiología">
+                </div>
+
+                <div class="form-group">
+                    <label for="service-icon">Icono</label>
+                    <select class="form-control" id="service-icon">
+                        <option value="fa-brain">Neurocirugía</option>
+                        <option value="fa-heart">Cardiología</option>
+                        <option value="fa-bone">Traumatología</option>
+                        <option value="fa-x-ray">Imagenología</option>
+                        <option value="fa-flask">Laboratorio</option>
+                        <option value="fa-ambulance">Emergencia</option>
+                        <option value="fa-procedures">Quirófano</option>
+                        <option value="fa-heartbeat">Angiología</option>
+                        <option value="fa-eye">Oftalmología</option>
+                        <option value="fa-baby">Pediatría</option>
+                        <option value="fa-female">Ginecología</option>
+                        <option value="fa-ribbon">Mastología</option>
+                        <option value="fa-cut">Cirugía Plástica</option>
+                        <option value="fa-kidneys">Urología</option>
+                        <option value="fa-utensils">Gastroenterología</option>
+                        <option value="fa-deaf">Otorrinolaringología</option>
+                        <option value="fa-prescription-bottle">Farmacia</option>
+                        <option value="fa-hospital">Hospitalización</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="service-description">Descripción</label>
+                    <textarea id="service-description" class="form-control" placeholder="Descripción detallada del servicio..."></textarea>
+                </div>
+            </div>
+
+            <div class="panel-actions">
+                <button class="btn btn-outline" id="delete-service">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+                <button class="btn btn-primary" id="save-service">
+                    <i class="fas fa-save"></i> Guardar Servicio
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel Contacto -->
+        <div class="edit-panel">
+            <div class="panel-header">
+                <h3 class="panel-title">
+                    <i class="fas fa-map-marker-alt panel-icon"></i> Contacto
+                </h3>
+            </div>
+
+            <div class="panel-content">
+                <div class="form-group">
+                    <label for="contact-address">Dirección</label>
+                    <input type="text" id="contact-address" class="form-control" value="Carrera 16 entre calles 43-44, Barquisimeto, Venezuela">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-phone">Teléfono</label>
+                    <input type="text" id="contact-phone" class="form-control" value="+58 414-0712439">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-email">Email</label>
+                    <input type="email" id="contact-email" class="form-control" value="conveniosynegocios@clinicaidetbarquisimeto.com.ve">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-map">Código de Google Maps</label>
+                    <textarea id="contact-map" class="form-control" placeholder="Inserte el iframe de Google Maps">&lt;iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3926.123456789012!2d-69.12345678901234!3d10.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDA3JzI0LjQiTiA2OcKwMDcnMjQuNCJX!5e0!3m2!1ses!2sve!4v1234567890123!5m2!1ses!2sve" allowfullscreen="" loading="lazy"&gt;&lt;/iframe&gt;</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Estadísticas</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label for="contact-patients">Pacientes/mes</label>
+                            <input type="number" id="contact-patients" class="form-control" value="1248">
+                        </div>
+                        <div>
+                            <label for="contact-trend">Tendencia (%)</label>
+                            <input type="number" id="contact-trend" class="form-control" value="12">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-actions">
+                <button class="btn btn-outline" id="preview-contact">
+                    <i class="fas fa-eye"></i> Previsualizar
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de previsualización -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h3>Previsualización</h3>
+                <span class="close-preview" id="closePreview">&times;</span>
+            </div>
+            <iframe class="preview-iframe" id="previewIframe"></iframe>
+        </div>
+    </div>
+
+    <!-- Mensaje de advertencia -->
+    <div class="warning-message">
+        <i class="fas fa-exclamation-triangle" style="color: var(--danger-red); margin-right: 0.5rem;"></i>
+        Toda la información editada debe ser verificada y aprobada por su supervisor antes de publicarse en el sitio web.
+    </div>
+
+    <!-- Footer con botón de salida -->
+    <footer class="footer">
+        <button class="logout-btn" onclick="window.location.href='EditorHome.html'">
+            <i class="fas fa-sign-out-alt"></i> Volver al Panel de Control
+        </button>
+    </footer>
+    <script>
+        // Datos de ejemplo (simulando base de datos)
+        const doctorsData = {
+            1: { name: "Dr. Carlos Angulo", specialty: "Neurocirujano", schedule: "Mar y Jue | 11am-4pm", description: "El Dr. Angulo es un neurocirujano con más de 20 años de experiencia en cirugías cerebrales complejas.", icon: "fa-brain" },
+            2: { name: "Dr. Carlos Leon", specialty: "Angiólogo", schedule: "Mar y Jue | 11am-4pm", description: "El Dr. Leon es un especialista en angiología con amplia experiencia en el tratamiento de enfermedades vasculares.", icon: "fa-heartbeat" },
+            3: { name: "Dra. Alicia Medina", specialty: "Angióloga", schedule: "Lun-Vie | 7am-4pm", description: "La Dra. Medina es una reconocida angióloga con más de 15 años de experiencia en el campo.", icon: "fa-heartbeat" },
+            4: { name: "Dr. Avendaño", specialty: "Cardiólogo", schedule: "Lun-Jue | 7am-3pm", description: "El Dr. Avendaño es un cardiólogo con una destacada carrera en el tratamiento de enfermedades cardíacas.", icon: "fa-heart" },
+            5: { name: "Dr. Arturo", specialty: "Cirujano Cardiólogo", schedule: "Jue y Vie | 10am-4pm", description: "El Dr. Arturo es un cirujano cardiólogo con experiencia en procedimientos quirúrgicos complejos.", icon: "fa-heart" },
+            6: { name: "Dr. Adelis Oviedo", specialty: "Médico Ocupacional", schedule: "Lun-Jue | 8am-4pm", description: "El Dr. Oviedo es un médico ocupacional dedicado a la salud y seguridad en el trabajo.", icon: "fa-briefcase-medical" },
+            7: { name: "Dra. Yolmar Gutierrez", specialty: "Médico General", schedule: "Lun-Vie | 8am-4pm", description: "La Dra. Gutierrez es una médica general con un enfoque en la atención primaria y preventiva.", icon: "fa-user-md" },
+            8: { name: "Dr. Felix", specialty: "Médico General", schedule: "Lun-Vie | 7am-4pm", description: "El Dr. Felix es un médico general con experiencia en el tratamiento de una amplia gama de condiciones médicas.", icon: "fa-user-md" },
+            9: { name: "Dr. Luis Torres", specialty: "Neumólogo", schedule: "Lun-Vie | 9am-5pm", description: "El Dr. Torres es un neumólogo especializado en enfermedades respiratorias crónicas.", icon: "fa-lungs" },
+            10: { name: "Dra. Ana Morales", specialty: "Neumóloga", schedule: "Mar-Jue | 10am-6pm", description: "La Dra. Morales es experta en el tratamiento de asma y alergias respiratorias.", icon: "fa-lungs" },
+            11: { name: "Dra. Sofia Ramirez", specialty: "Pediatra", schedule: "Lun-Vie | 8am-4pm", description: "La Dra. Ramirez es una pediatra con un enfoque en el desarrollo infantil.", icon: "fa-baby" },
+            12: { name: "Dr. Jorge Lopez", specialty: "Pediatra", schedule: "Lun-Vie | 9am-5pm", description: "El Dr. Lopez es especialista en pediatría preventiva y tratamiento de enfermedades infantiles.", icon: "fa-baby" },
+            13: { name: "Dra. Laura Fernandez", specialty: "Dermatóloga", schedule: "Lun-Vie | 10am-6pm", description: "La Dra. Fernandez es especialista en dermatología con enfoque en tratamientos de piel y estética.", icon: "fa-sun" },
+            14: { name: "Dr. Roberto Mendoza", specialty: "Gastroenterólogo", schedule: "Mar-Jue | 9am-5pm", description: "El Dr. Mendoza es un gastroenterólogo con experiencia en tratamientos de enfermedades digestivas.", icon: "fa-utensils" },
+            15: { name: "Dra. Patricia Herrera", specialty: "Oftalmóloga", schedule: "Lun-Vie | 8am-4pm", description: "La Dra. Herrera es una oftalmóloga especializada en cirugía refractiva y tratamiento de enfermedades oculares.", icon: "fa-eye" },
+            16: { name: "Dr. Miguel Sánchez", specialty: "Endocrinólogo", schedule: "Lun-Jue | 9am-5pm", description: "El Dr. Sánchez es un endocrinólogo con enfoque en el tratamiento de diabetes y trastornos hormonales.", icon: "fa-flask" }
+        };
+
+        const servicesData = {
+            1: { name: "Neurocirugía", icon: "fa-brain", description: "Especialidad dentro del area de la medicina encargando quirúrgica que se ocupa del diagnóstico y tratamiento de pacientes con lesiones o enfermedades del sistema nervioso central, periférico y vegetativo." },
+            2: { name: "Medicina Ocupacional", icon: "fa-briefcase-medical", description: "La medicina ocupacional es una especialidad médica enfocada en la salud y el bienestar de los trabajadores. Su objetivo principal es prevenir, diagnosticar y tratar lesiones y enfermedades relacionadas con el trabajo o el ambiente laboral." },
+            3: { name: "Traumatología", icon: "fa-bone", description: "Especialidad médica que se dedica al estudio de las lesiones del aparato locomotor." },
+            4: { name: "Medicina General", icon: "fa-user-md", description: "Atención primaria que se encarga del diagnóstico y tratamiento de enfermedades comunes." },
+            5: { name: "Ginecología", icon: "fa-female", description: "Especialidad médica que se ocupa de la salud del aparato reproductor femenino." },
+            6: { name: "Mastología", icon: "fa-ribbon", description: "Subespecialidad médica que se dedica al estudio, diagnóstico y tratamiento de las enfermedades de la mama." },
+            7: { name: "Cirugía Plástica", icon: "fa-cut", description: "Especialidad médica que tiene como función llevar a la normalidad funcional y anatómica la cobertura corporal humana." },
+            8: { name: "Cardiología", icon: "fa-heart", description: "Rama de la medicina que se especializa en el diagnóstico y tratamiento de las enfermedades del corazón." },
+            9: { name: "Urología", icon: "fa-kidneys", description: "Especialidad médico-quirúrgica que se ocupa del diagnóstico y tratamiento de las patologías del tracto urinario." },
+            10: { name: "Emergencia", icon: "fa-ambulance", description: "Servicio disponible 24/7 para atención de urgencias médicas." },
+            11: { name: "Imagenología", icon: "fa-x-ray", description: "Área de la medicina que emplea diferentes técnicas de imagen para el diagnóstico y tratamiento de enfermedades." },
+            12: { name: "Laboratorio", icon: "fa-flask", description: "Análisis clínicos y estudios especializados para diagnóstico preciso." },
+            13: { name: "Quirófano", icon: "fa-procedures", description: "Área equipada con tecnología de punta para procedimientos quirúrgicos." },
+            14: { name: "Psicología", icon: "fa-brain", description: "Evaluación, diagnóstico e intervención psicológica para pacientes." },
+            15: { name: "Angiología", icon: "fa-heartbeat", description: "Especialidad médica que se dedica al estudio de los vasos del sistema circulatorio y linfático." },
+            16: { name: "Oftalmología", icon: "fa-eye", description: "Especialidad médica que estudia las enfermedades de los ojos." },
+            17: { name: "Pediatría", icon: "fa-baby", description: "Medicina especializada en la salud infantil desde el nacimiento hasta la adolescencia." },
+            18: { name: "Farmacia", icon: "fa-prescription-bottle", description: "Servicio de dispensación de medicamentos y asesoramiento farmacéutico." },
+            19: { name: "Hospitalización", icon: "fa-hospital", description: "Áreas de internamiento para pacientes que requieren observación continua." },
+            20: { name: "Otorrinolaringología", icon: "fa-deaf", description: "Especialidad médica que se encarga de las enfermedades del oído, nariz y garganta." },
+            21: { name: "Gastroenterología", icon: "fa-utensils", description: "Especialidad médica que se ocupa del estudio del aparato digestivo y sus enfermedades." }
+        };
+
+        // Funcionalidad de los paneles
+        document.addEventListener('DOMContentLoaded', function() {
+            // Homepage - Carrusel
+            document.getElementById('carousel-upload-area').addEventListener('click', function() {
+                document.getElementById('carousel-upload').click();
+            });
+
+            document.getElementById('carousel-upload').addEventListener('change', function(e) {
+                const files = e.target.files;
+                const previewContainer = document.getElementById('carousel-preview');
+
+                for (let i = 0; i < files.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${event.target.result}" alt="Preview">
+                            <div class="remove-image"><i class="fas fa-times"></i></div>
+                        `;
+                        previewContainer.appendChild(previewItem);
+
+                        // Agregar evento para eliminar imagen
+                        previewItem.querySelector('.remove-image').addEventListener('click', function() {
+                            previewItem.remove();
+                        });
+                    };
+                    reader.readAsDataURL(files[i]);
+                }
+            });
+
+            // Eliminar imágenes del carrusel
+            document.querySelectorAll('.remove-image').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.parentElement.remove();
+                });
+            });
+
+            // Previsualización Homepage
+            document.getElementById('preview-home').addEventListener('click', function() {
+                const previewModal = document.getElementById('previewModal');
+                const previewIframe = document.getElementById('previewIframe');
+
+                previewIframe.src = 'index.html';
+                previewModal.style.display = 'flex';
+            });
+
+            // Directorio Médico - Cargar datos al seleccionar
+            document.getElementById('doctor-select').addEventListener('change', function() {
+                const doctorId = this.value;
+                if (doctorId && doctorsData[doctorId]) {
+                    const doctor = doctorsData[doctorId];
+                    document.getElementById('doctor-name').value = doctor.name;
+                    document.getElementById('doctor-specialty').value = doctor.specialty;
+                    document.getElementById('doctor-schedule').value = doctor.schedule;
+                    document.getElementById('doctor-description').value = doctor.description;
+                    document.getElementById('doctor-icon').value = doctor.icon;
+                }
+            });
+
+            // Guardar doctor
+            document.getElementById('save-doctor').addEventListener('click', function() {
+                alert("Cambios en el directorio médico guardados correctamente.");
+            });
+
+            // Eliminar doctor
+            document.getElementById('delete-doctor').addEventListener('click', function() {
+                if (confirm("¿Está seguro de eliminar este médico del directorio?")) {
+                    alert("Médico eliminado correctamente.");
+                }
+            });
+
+            // Añadir nuevo doctor
+            document.getElementById('add-doctor').addEventListener('click', function() {
+                // Limpiar formulario
+                document.getElementById('doctor-name').value = '';
+                document.getElementById('doctor-specialty').value = '';
+                document.getElementById('doctor-schedule').value = '';
+                document.getElementById('doctor-description').value = '';
+                document.getElementById('doctor-icon').value = 'fa-user-md';
+
+                alert("Complete los datos del nuevo médico y guarde los cambios.");
+            });
+
+            // Servicios - Cargar datos al seleccionar
+            document.getElementById('service-select').addEventListener('change', function() {
+                const serviceId = this.value;
+                if (serviceId && servicesData[serviceId]) {
+                    const service = servicesData[serviceId];
+                    document.getElementById('service-name').value = service.name;
+                    document.getElementById('service-icon').value = service.icon;
+                    document.getElementById('service-description').value = service.description;
+                }
+            });
+
+            // Guardar servicio
+            document.getElementById('save-service').addEventListener('click', function() {
+                alert("Cambios en los servicios guardados correctamente.");
+            });
+
+            // Eliminar servicio
+            document.getElementById('delete-service').addEventListener('click', function() {
+                if (confirm("¿Está seguro de eliminar este servicio?")) {
+                    alert("Servicio eliminado correctamente.");
+                }
+            });
+
+            // Añadir nuevo servicio
+            document.getElementById('add-service').addEventListener('click', function() {
+                // Limpiar formulario
+                document.getElementById('service-name').value = '';
+                document.getElementById('service-icon').value = 'fa-procedures';
+                document.getElementById('service-description').value = '';
+
+                alert("Complete los datos del nuevo servicio y guarde los cambios.");
+            });
+
+            // Contacto - Previsualización
+            document.getElementById('preview-contact').addEventListener('click', function() {
+                const previewModal = document.getElementById('previewModal');
+                const previewIframe = document.getElementById('previewIframe');
+
+                previewIframe.src = 'index4.html';
+                previewModal.style.display = 'flex';
+            });
+
+            // Cerrar previsualización
+            document.getElementById('closePreview').addEventListener('click', function() {
+                document.getElementById('previewModal').style.display = 'none';
+                document.getElementById('previewIframe').src = '';
+            });
+
+            // Mostrar mensaje al guardar en contacto
+            document.querySelector('.edit-panel:nth-child(4) .btn-primary').addEventListener('click', function() {
+                alert("Cambios en la página de contacto guardados correctamente.");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Administrador</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeOut 0.8s ease-out forwards;
+            animation-delay: 2.5s;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .logo-loading {
+            height: 80px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        .register-container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            width: 340px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+            animation-delay: 3s;
+            border: 1px solid #e2e8f0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .register-container h2 {
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .register-form input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+        }
+
+        .register-form input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .register-form button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .register-form button:hover {
+            background-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            height: 70px;
+            opacity: 0.95;
+        }
+
+        .button-group {
+            margin-top: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .back-button {
+            display: block;
+            background-color: transparent;
+            color: #64748b;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            color: #475569;
+            background-color: #f1f5f9;
+        }
+
+        .code-hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+            text-align: left;
+            font-style: italic;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <img src="/img/logo-idet-400.png" alt="Logo IDET" class="logo-loading">
+    </div>
+
+    <div class="register-container">
+        <div class="logo">
+            <img src="/img/logo-idet-400.png" alt="Logo IDET">
+        </div>
+        <h2>Registro de Administrador</h2>
+        <form class="register-form" id="adminRegisterForm">
+            <input type="text" id="username" name="username" placeholder="Nombre de usuario" required>
+            <input type="password" id="password" name="password" placeholder="Contraseña" required>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirmar contraseña" required>
+            <input type="text" id="adminCode" name="adminCode" placeholder="Código de administración" required>
+            <!--El codigo de es IDET*2025 para poder registrar un admin nuevo-->
+            <p class="code-hint"></p>
+            <p class="error-message" id="errorMessage"></p>
+            <button type="submit">Registrar Administrador</button>
+        </form>
+        <div class="button-group">
+            <a href="/index5.html" class="back-button">← Volver al inicio de sesión</a>
+        </div>
+    </div>
+
+    <script>
+        // Ocultar pantalla de carga
+        setTimeout(function() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }, 3000);
+
+        // Validación del formulario
+        document.getElementById('adminRegisterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const adminCode = document.getElementById('adminCode').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Resetear mensaje de error
+            errorMessage.style.display = 'none';
+            
+            // Validar código
+            if (adminCode !== 'IDET*2025') {
+                errorMessage.textContent = 'Código de administración incorrecto';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Validar contraseñas
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Las contraseñas no coinciden';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Validar longitud de contraseña
+            if (password.length < 8) {
+                errorMessage.textContent = 'La contraseña debe tener al menos 8 caracteres';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Si todo es válido, puedes enviar el formulario
+            alert('Registro exitoso! Serás redirigido al panel de administración.');
+            // Aquí iría la lógica para enviar los datos al servidor
+            // window.location.href = 'admin-panel.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directorio Médico - IDET-Barquisimeto</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            padding: 20px;
+            background: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #0a1128;
+        }
+        .specialty-icon {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .doctors-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .doctor-card {
+            background: linear-gradient(135deg, #003366, #001a33);
+            width: calc(33% - 20px);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .doctor-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .doctor-card h3 {
+            margin-bottom: 10px;
+        }
+        .doctor-card p {
+            margin-bottom: 5px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 10px;
+            animation: modalopen 0.4s;
+        }
+        @keyframes modalopen {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .doctor-card {
+                width: calc(50% - 20px);
+            }
+        }
+        @media (max-width: 480px) {
+            .doctor-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="/img/logo-idet-400.png" height="100" width="200" alt="Logo IDET">
+        <h1>Directorio Médico</h1>
+        <h2>Nuestro directorio médico es variado, desde medicina general hasta Neurocirugía y Lic. en Imagenología.</h2>
+    </header>
+    <div class="doctors-grid">
+        <!-- Neurocirugía -->
+        <div class="doctor-card" onclick="openModal('Dr. Carlos Angulo', 'Neurocirujano', 'Mar y Jue | 11am-4pm', 'El Dr. Angulo es un neurocirujano con más de 20 años de experiencia en cirugías cerebrales complejas.')">
+            <div class="specialty-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h3>Dr. Carlos Angulo</h3>
+            <p><strong>Especialidad:</strong> Neurocirujano</p>
+        </div>
+        <!-- Angiología -->
+        <div class="doctor-card" onclick="openModal('Dr. Carlos Leon', 'Angiólogo', 'Mar y Jue | 11am-4pm', 'El Dr. Leon es un especialista en angiología con amplia experiencia en el tratamiento de enfermedades vasculares.')">
+            <div class="specialty-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h3>Dr. Carlos Leon</h3>
+            <p><strong>Especialidad:</strong> Angiólogo</p>
+        </div>
+        <div class="doctor-card" onclick="openModal('Dra. Alicia Medina', 'Angióloga', 'Lun-Vie | 7am-4pm', 'La Dra. Medina es una reconocida angióloga con más de 15 años de experiencia en el campo.')">
+            <div class="specialty-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h3>Dra. Alicia Medina</h3>
+            <p><strong>Especialidad:</strong> Angióloga</p>
+        </div>
+        <!-- Cardiología -->
+        <div class="doctor-card" onclick="openModal('Dr. Avendaño', 'Cardiólogo', 'Lun-Jue | 7am-3pm', 'El Dr. Avendaño es un cardiólogo con una destacada carrera en el tratamiento de enfermedades cardíacas.')">
+            <div class="specialty-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3>Dr. Avendaño</h3>
+            <p><strong>Especialidad:</strong> Cardiólogo</p>
+        </div>
+        <div class="doctor-card" onclick="openModal('Dr. Arturo', 'Cirujano Cardiólogo', 'Jue y Vie | 10am-4pm', 'El Dr. Arturo es un cirujano cardiólogo con experiencia en procedimientos quirúrgicos complejos.')">
+            <div class="specialty-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3>Dr. Arturo</h3>
+            <p><strong>Especialidad:</strong> Cirujano Cardiólogo</p>
+        </div>
+        <!-- Medicina Ocupacional -->
+        <div class="doctor-card" onclick="openModal('Dr. Adelis Oviedo', 'Médico Ocupacional', 'Lun-Jue | 8am-4pm', 'El Dr. Oviedo es un médico ocupacional dedicado a la salud y seguridad en el trabajo.')">
+            <div class="specialty-icon">
+                <i class="fas fa-briefcase-medical"></i>
+            </div>
+            <h3>Dr. Adelis Oviedo</h3>
+            <p><strong>Especialidad:</strong> Médico Ocupacional</p>
+        </div>
+        <!-- Medicina General -->
+        <div class="doctor-card" onclick="openModal('Dra. Yolmar Gutierrez', 'Médico General', 'Lun-Vie | 8am-4pm', 'La Dra. Gutierrez es una médica general con un enfoque en la atención primaria y preventiva.')">
+            <div class="specialty-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h3>Dra. Yolmar Gutierrez</h3>
+            <p><strong>Especialidad:</strong> Médico General</p>
+        </div>
+        <div class="doctor-card" onclick="openModal('Dr. Felix', 'Médico General', 'Lun-Vie | 7am-4pm', 'El Dr. Felix es un médico general con experiencia en el tratamiento de una amplia gama de condiciones médicas.')">
+            <div class="specialty-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h3>Dr. Felix</h3>
+            <p><strong>Especialidad:</strong> Médico General</p>
+        </div>
+        <!-- Neumología -->
+        <div class="doctor-card" onclick="openModal('Dr. Luis Torres', 'Neumólogo', 'Lun-Vie | 9am-5pm', 'El Dr. Torres es un neumólogo especializado en enfermedades respiratorias crónicas.')">
+            <div class="specialty-icon">
+                <i class="fas fa-lungs"></i>
+            </div>
+            <h3>Dr. Luis Torres</h3>
+            <p><strong>Especialidad:</strong> Neumólogo</p>
+        </div>
+        <div class="doctor-card" onclick="openModal('Dra. Ana Morales', 'Neumóloga', 'Mar-Jue | 10am-6pm', 'La Dra. Morales es experta en el tratamiento de asma y alergias respiratorias.')">
+            <div class="specialty-icon">
+                <i class="fas fa-lungs"></i>
+            </div>
+            <h3>Dra. Ana Morales</h3>
+            <p><strong>Especialidad:</strong> Neumóloga</p>
+        </div>
+        <!-- Pediatría -->
+        <div class="doctor-card" onclick="openModal('Dra. Sofia Ramirez', 'Pediatra', 'Lun-Vie | 8am-4pm', 'La Dra. Ramirez es una pediatra con un enfoque en el desarrollo infantil.')">
+            <div class="specialty-icon">
+                <i class="fas fa-baby"></i>
+            </div>
+            <h3>Dra. Sofia Ramirez</h3>
+            <p><strong>Especialidad:</strong> Pediatra</p>
+        </div>
+        <div class="doctor-card" onclick="openModal('Dr. Jorge Lopez', 'Pediatra', 'Lun-Vie | 9am-5pm', 'El Dr. Lopez es especialista en pediatría preventiva y tratamiento de enfermedades infantiles.')">
+            <div class="specialty-icon">
+                <i class="fas fa-baby"></i>
+            </div>
+            <h3>Dr. Jorge Lopez</h3>
+            <p><strong>Especialidad:</strong> Pediatra</p>
+        </div>
+        <!-- Dermatología -->
+        <div class="doctor-card" onclick="openModal('Dra. Laura Fernandez', 'Dermatóloga', 'Lun-Vie | 10am-6pm', 'La Dra. Fernandez es especialista en dermatología con enfoque en tratamientos de piel y estética.')">
+            <div class="specialty-icon">
+                <i class="fas fa-sun"></i>
+            </div>
+            <h3>Dra. Laura Fernandez</h3>
+            <p><strong>Especialidad:</strong> Dermatóloga</p>
+        </div>
+        <!-- Gastroenterología -->
+        <div class="doctor-card" onclick="openModal('Dr. Roberto Mendoza', 'Gastroenterólogo', 'Mar-Jue | 9am-5pm', 'El Dr. Mendoza es un gastroenterólogo con experiencia en tratamientos de enfermedades digestivas.')">
+            <div class="specialty-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <h3>Dr. Roberto Mendoza</h3>
+            <p><strong>Especialidad:</strong> Gastroenterólogo</p>
+        </div>
+        <!-- Oftalmología -->
+        <div class="doctor-card" onclick="openModal('Dra. Patricia Herrera', 'Oftalmóloga', 'Lun-Vie | 8am-4pm', 'La Dra. Herrera es una oftalmóloga especializada en cirugía refractiva y tratamiento de enfermedades oculares.')">
+            <div class="specialty-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <h3>Dra. Patricia Herrera</h3>
+            <p><strong>Especialidad:</strong> Oftalmóloga</p>
+        </div>
+        <!-- Endocrinología -->
+        <div class="doctor-card" onclick="openModal('Dr. Miguel Sánchez', 'Endocrinólogo', 'Lun-Jue | 9am-5pm', 'El Dr. Sánchez es un endocrinólogo con enfoque en el tratamiento de diabetes y trastornos hormonales.')">
+            <div class="specialty-icon">
+                <i class="fas fa-flask"></i>
+            </div>
+            <h3>Dr. Miguel Sánchez</h3>
+            <p><strong>Especialidad:</strong> Endocrinólogo</p>
+        </div>
+        <!-- Traumatología -->
+        <div class="doctor-card" onclick="openModal('Dr. Juan Pérez', 'Traumatólogo', 'Lun-Vie | 10am-6pm', 'El Dr. Pérez es un traumatólogo especializado en cirugías ortopédicas y tratamiento de fracturas.')">
+            <div class="specialty-icon">
+                <i class="fas fa-bone"></i>
+            </div>
+            <h3>Dr. Juan Pérez</h3>
+            <p><strong>Especialidad:</strong> Traumatólogo</p>
+        </div>
+        <!-- Urología -->
+        <div class="doctor-card" onclick="openModal('Dr. Alberto García', 'Urólogo', 'Mar-Jue | 9am-5pm', 'El Dr. García es un urólogo con experiencia en tratamientos de enfermedades del sistema urinario.')">
+            <div class="specialty-icon">
+                <i class="fas fa-kidneys"></i>
+            </div>
+            <h3>Dr. Alberto García</h3>
+            <p><strong>Especialidad:</strong> Urólogo</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="doctorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-doctor-name"></h2>
+            <p><strong>Especialidad:</strong> <span id="modal-doctor-specialty"></span></p>
+            <p><strong>Horario:</strong> <span id="modal-doctor-schedule"></span></p>
+            <p id="modal-doctor-description"></p>
+        </div>
+    </div>
+
+    <footer>
+        <hr>
+        <div>
+            <a href="/index.html">Home</a>
+            <a href="/index3.html">Servicios</a>
+            <a href="index4.html">Contacto</a>
+        </div>
+        <hr>
+    </footer>
+
+    <script>
+        function openModal(name, specialty, schedule, description) {
+            document.getElementById('modal-doctor-name').textContent = name;
+            document.getElementById('modal-doctor-specialty').textContent = specialty;
+            document.getElementById('modal-doctor-schedule').textContent = schedule;
+            document.getElementById('modal-doctor-description').textContent = description;
+            document.getElementById('doctorModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('doctorModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('doctorModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
